@@ -2,9 +2,12 @@ package com.example.demo;
 
 import com.example.demo.client.UnisendClient;
 import com.example.demo.client.UnisendClientImpl;
+import com.example.demo.client.WebHookEventByUser;
+import com.example.demo.client.WebhookEventRequest;
 import com.example.demo.client.entity.ContactList;
 import com.example.demo.client.entity.UnisenderResponseEntity;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
@@ -16,6 +19,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.util.List;
 
 public class ClientTest {
 
@@ -32,7 +36,7 @@ public class ClientTest {
     private ObjectMapper mapper = new ObjectMapper();
 
 
-    private UnisendClient client = new UnisendClientImpl();
+    private UnisendClientImpl client = new UnisendClientImpl();
 
 
 
@@ -77,9 +81,35 @@ public class ClientTest {
     @Test
     public void contactListtest() throws IOException {
 
+        String url = "http://1cdaaa0a.ngrok.io/1234";
+        client.setHook(url,API_KEY);
+    }
 
-        ContactList finaly = client.createList("FINALY", API_KEY);
 
-        System.out.println(finaly);
+
+    @Test
+    public void webHookParseTest() throws IOException {
+
+        String json = "{\"auth\":\"3419eecfd99f6a13764e26882e5d6f47\",\"events_by_user\":[{\"login\":\"d3vtest@yandex.ru\",\"events\":[{\"event_name\":\"user_info\",\"event_time\":\"2018-08-06 21:56:14\",\"event_data\":{\"phone\":\"+375296571934\",\"timezone\":\"America\\/Danmarkshavn\",\"country\":\"PER\"}}]}]}";
+
+
+        JsonNode jsonNode = mapper.readValue(json, JsonNode.class);
+
+        JsonNode auth = jsonNode.get("auth");
+
+        System.out.println(auth);
+
+        WebhookEventRequest webhookEventRequest = new WebhookEventRequest();
+
+        webhookEventRequest.setAuth(auth.toString());
+
+        JsonNode eventsByUser = jsonNode.get("events_by_user");
+
+
+
+        System.out.println(eventsByUser);
+
+
+
     }
 }

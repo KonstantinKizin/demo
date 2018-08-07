@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class UnisendClientImpl implements UnisendClient {
 
-    private enum Methods{
+    private enum Methods {
 
         SET_HOOK("setHook"),
         GET_LISTS("getLists"),
@@ -28,11 +28,12 @@ public class UnisendClientImpl implements UnisendClient {
         UPDATE_LIST("updateList");
 
         String value;
-        Methods(String value){
+
+        Methods(String value) {
             this.value = value;
         }
 
-        public String getValue(){
+        public String getValue() {
             return this.value;
         }
 
@@ -50,7 +51,7 @@ public class UnisendClientImpl implements UnisendClient {
         String getListurl = BASE_URL.concat(Methods.GET_LISTS.value);
 
         String url = UriComponentsBuilder.fromUriString(getListurl)
-                .queryParam("api_key",apiKey)
+                .queryParam("api_key", apiKey)
                 .build()
                 .toUriString();
 
@@ -60,12 +61,11 @@ public class UnisendClientImpl implements UnisendClient {
                 = getMapper().readValue(entityResponse, new TypeReference<UnisenderResponseEntity<List<ContactList>>>() {
         });
 
-        if(!StringUtils.isEmpty(lists.getError())){
+        if (!StringUtils.isEmpty(lists.getError())) {
 
         }
         return lists.getResult();
     }
-
 
 
     @Override
@@ -73,8 +73,8 @@ public class UnisendClientImpl implements UnisendClient {
 
         String createListUrl = BASE_URL.concat(Methods.CREATE_LIST.getValue());
         String url = UriComponentsBuilder.fromUriString(createListUrl)
-                .queryParam("api_key",apiKey)
-                .queryParam("title",newListName)
+                .queryParam("api_key", apiKey)
+                .queryParam("title", newListName)
                 .build()
                 .toUriString();
         String entityResponse = getEntityResponse(url);
@@ -83,12 +83,12 @@ public class UnisendClientImpl implements UnisendClient {
                 = getMapper().readValue(entityResponse, new TypeReference<UnisenderResponseEntity<Object>>() {
         });
 
-        if(StringUtils.isEmpty(createdList.getError())){
+        if (StringUtils.isEmpty(createdList.getError())) {
 
             JsonNode jsonNode = getMapper().readValue(entityResponse, JsonNode.class);
-            if(jsonNode.has("result")){
+            if (jsonNode.has("result")) {
                 JsonNode result = jsonNode.get("result");
-                if(result.has("id")){
+                if (result.has("id")) {
                     JsonNode id = result.get("id");
                     ContactList list = new ContactList();
                     list.setTitle(newListName);
@@ -106,8 +106,8 @@ public class UnisendClientImpl implements UnisendClient {
         String deleteUrl = BASE_URL.concat(Methods.DELETE_LIST.getValue());
 
         String url = UriComponentsBuilder.fromUriString(deleteUrl)
-                .queryParam("api_key",apiKey)
-                .queryParam("list_id",listId)
+                .queryParam("api_key", apiKey)
+                .queryParam("list_id", listId)
                 .build()
                 .toUriString();
 
@@ -117,7 +117,7 @@ public class UnisendClientImpl implements UnisendClient {
                 = getMapper().readValue(entityResponse, new TypeReference<UnisenderResponseEntity>() {
         });
 
-        if(StringUtils.isEmpty(entity.getError())){
+        if (StringUtils.isEmpty(entity.getError())) {
             return true;
         }
         return false;
@@ -129,9 +129,9 @@ public class UnisendClientImpl implements UnisendClient {
         String updateUtl = BASE_URL.concat(Methods.UPDATE_LIST.getValue());
 
         String url = UriComponentsBuilder.fromUriString(updateUtl)
-                .queryParam("api_key",apiKey)
-                .queryParam("list_id",listId)
-                .queryParam("title",title)
+                .queryParam("api_key", apiKey)
+                .queryParam("list_id", listId)
+                .queryParam("title", title)
                 .build()
                 .toUriString();
 
@@ -141,7 +141,7 @@ public class UnisendClientImpl implements UnisendClient {
                 = getMapper().readValue(entityResponse, new TypeReference<ContactList>() {
         });
 
-        if(StringUtils.isEmpty(entity.getError())){
+        if (StringUtils.isEmpty(entity.getError())) {
             ContactList contactList = new ContactList();
             contactList.setTitle(title);
             contactList.setId(listId);
@@ -153,10 +153,6 @@ public class UnisendClientImpl implements UnisendClient {
 
     @Override
     public List<Contact> exportContacts(Long listId, Map<String, String> fields, String apiKey) {
-
-
-
-
 
 
         return null;
@@ -172,6 +168,24 @@ public class UnisendClientImpl implements UnisendClient {
         return null;
     }
 
+    public void setHook(String url, String apiKey){
+
+        String path = BASE_URL.concat(Methods.SET_HOOK.getValue());
+
+        String uriString = UriComponentsBuilder.fromUriString(path)
+                .queryParam("events[user_info]", "*")
+                .queryParam("api_key", apiKey)
+                .queryParam("hook_url", url)
+                .queryParam("event_format","json_post")
+                .build()
+                .toUriString();
+        String entityResponse = getEntityResponse(uriString);
+
+        System.out.println(entityResponse);
+
+
+    }
+
 
     private String getEntityResponse(String url){
 
@@ -182,6 +196,9 @@ public class UnisendClientImpl implements UnisendClient {
         return forEntity.getBody();
 
     }
+
+
+
 
 
     private ObjectMapper getMapper() {
